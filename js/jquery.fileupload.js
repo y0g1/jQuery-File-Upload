@@ -845,6 +845,9 @@
                             jqXHRorError,
                             options
                         );
+                        if(typeof window.filesProcessingCount != 'undefined') {
+                            window.filesProcessingCount -= 1;
+                        }
                         that._sending -= 1;
                         that._active -= 1;
                         if (options.limitConcurrentUploads &&

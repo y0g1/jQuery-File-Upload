@@ -38,6 +38,11 @@
     // Prepend to the default processQueue:
     $.blueimp.fileupload.prototype.options.processQueue.unshift(
         {
+            action: 'processLimitCheck',
+            processingLimit: '@',
+            disabled: '@disableProcessingLimitCheck'
+        },
+        {
             action: 'loadImageMetaData',
             disableImageHead: '@',
             disableExif: '@',
@@ -129,10 +134,34 @@
             // Define if preview images should be cropped or only scaled:
             previewCrop: false,
             // Define if preview images should be resized as canvas elements:
-            previewCanvas: true
+            previewCanvas: true,
+            // Defines the limit of files processed and not uploaded
+            processingLimit: 50
         },
 
         processActions: {
+
+            processLimitCheck: function (data, options) {
+                if (options.disabled) {
+                    return data;
+                }
+                var dfd = $.Deferred(),
+                waitForPlace = function(that) {
+                    if (!window.filesProcessingCount || options.filesProcessingLimitCount  >= window.filesProcessingCount) {
+                        if( !window.filesProcessingCount ) {
+                            window.filesProcessingCount = 0;
+                        }
+                        window.filesProcessingCount++;
+                        dfd.resolveWith(that, [data]);
+                    } else {
+                        setTimeout (function() {
+                            waitForPlace(that);
+                        }, 300);
+                    }
+                };
+                waitForPlace(this);
+                return dfd.promise();
+            },
 
             // Loads the image given via data.files and data.index
             // as img element, if the browser supports the File API.
