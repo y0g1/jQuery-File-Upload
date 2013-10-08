@@ -226,9 +226,15 @@
                                 );
                             }
                         }
-                        // Store the created blob at the position
-                        // of the original file in the files list:
-                        data.files[data.index] = blob;
+                        // Failsafe for when browser producing empty canvas image
+                        // If dataURL of empty canvas is the same as our new canvas dataURL means something went wrong
+                        if((typeof data.canvas.toDataURL != 'function' || $('<canvas/>')[0].toDataURL() != data.canvas.toDataURL())
+                        //&& (blob.size > 10000 || (blob.size == data.files[data.index].size))) 
+                        {
+                            // Store the created blob at the position
+                            // of the original file in the files list:
+                            data.files[data.index] = blob;
+                        }
                         dfd.resolveWith(that, [data]);
                     };
                 // Use canvas.mozGetAsFile directly, to retain the filename, as
